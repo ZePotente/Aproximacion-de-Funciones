@@ -5,12 +5,15 @@ PROGRAM APROX_FUNC
     
     IMPLICIT NONE
     REAL(8), DIMENSION(:,:), ALLOCATABLE :: XY
-    REAL(8), DIMENSION(:), ALLOCATABLE :: X, Y
+    REAL(8), DIMENSION(:), ALLOCATABLE :: X, Y, RES
     INTEGER :: BANDERA
     
     PRINT *, 'Leyendo matriz.'
     CALL MAT_LEER(XY, BANDERA, 'Puntos.txt')
     IF (BANDERA == 1) GOTO 10
+    PRINT *, 'Cantidad de puntos: ', SIZE(XY,1)
+    IF (SIZE(XY,1) < 2) THEN; PRINT *, 'Se necesitan al menos 2 puntos para interpolar.'; GOTO 20; END IF
+    
     PRINT *, 'Separo X e Y de la matriz de puntos iniciales.'
     CALL SEPARARXY(XY, X, Y)
     PRINT *, 'Matriz de puntos iniciales:'
@@ -20,8 +23,11 @@ PROGRAM APROX_FUNC
     PRINT *, 'Vector de valores de Y:'
     CALL VEC_MOSTRAR(Y)
     
-    
-    
+    PRINT *, 'Obteniendo coeficientes del polinomio interpolante.'
+    CALL POLINOMIO_APROX(X, Y, RES)
+    PRINT *, 'Coeficientes: '
+    CALL VEC_MOSTRAR(RES)
+    GOTO 20
 10  PRINT *, 'Error de lectura de datos.'
 20  PRINT *, 'Fin.'
 CONTAINS
