@@ -57,6 +57,7 @@ CONTAINS
         REAL(8), DIMENSION(:), ALLOCATABLE, INTENT(OUT) :: RESLG
         !
         REAL(8), DIMENSION(:), ALLOCATABLE :: XLG, YLG
+        REAL(8) :: XPUNTO, YPUNTO
         INTEGER :: N
         
         N = SIZE(X)
@@ -68,5 +69,10 @@ CONTAINS
         PRINT *, 'Coeficientes: '
         CALL VEC_MOSTRAR(RESLG)
         
+        XPUNTO = 0.4
+        PRINT *, 'Calculo en el punto: ', XPUNTO
+        PRINT *, 'Calculando.'
+        YPUNTO = PUNTO_LAGRANGE(XLG, YLG, XPUNTO)
+        PRINT *, 'Punto calculado: ', YPUNTO
     END SUBROUTINE
 END PROGRAM

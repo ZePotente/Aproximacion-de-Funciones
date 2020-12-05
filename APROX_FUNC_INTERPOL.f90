@@ -96,10 +96,22 @@ CONTAINS
     END FUNCTION
     !Fin Lagrange copypasteado
     
-!    FUNCTION PUNTO_LAGRANGE(N, XLG, XPUNTO)
-!        REAL(8), DIMENSION(0:N-1)
-    
-!    END FUNCTION
+    FUNCTION PUNTO_LAGRANGE(XLG, YLG, XPUNTO)
+        REAL(8) :: PUNTO_LAGRANGE
+        REAL(8), DIMENSION(:), INTENT(IN) :: XLG, YLG !Se supone que van de (0:N-1)
+        REAL(8), INTENT(IN) :: XPUNTO
+        !
+        REAL(8) :: LK
+        INTEGER :: K, N
+        
+        N = SIZE(XLG)
+        
+        PUNTO_LAGRANGE = 0.
+        DO K = 0, N-1
+            LK = CALC_A(K, XLG, XPUNTO) / CALC_A(K, XLG, XLG(K))
+            PUNTO_LAGRANGE = PUNTO_LAGRANGE + LK*YLG(K)
+        END DO
+    END FUNCTION
     
     FUNCTION CALC_A(K, XLG, XPUNTO)
         REAL(8) :: CALC_A
@@ -111,10 +123,11 @@ CONTAINS
         N = SIZE(XLG)
         CALC_A = 1.
         DO I = 0, K-1
-            CALC_A = CALC_A * (XLG(I)*XPUNTO)
+            CALC_A = CALC_A * (XLG(I)-XPUNTO)
+            !PRINT*, '(', XLG(I)'
         END DO
         DO I = K+1, N-1
-            CALC_A = CALC_A * (XLG(I)*XPUNTO)
+            CALC_A = CALC_A * (XLG(I)-XPUNTO)
         END DO
     END FUNCTION
     
