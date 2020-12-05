@@ -96,4 +96,27 @@ CONTAINS
     END FUNCTION
     !Fin Lagrange copypasteado
     
+!    FUNCTION PUNTO_LAGRANGE(N, XLG, XPUNTO)
+!        REAL(8), DIMENSION(0:N-1)
+    
+!    END FUNCTION
+    
+    FUNCTION CALC_A(K, XLG, XPUNTO)
+        REAL(8) :: CALC_A
+        REAL(8), INTENT(IN) :: XPUNTO, XLG(:) !(va de 0 a n-1)
+        INTEGER, INTENT(IN) :: K
+        !
+        INTEGER :: I, N
+        
+        N = SIZE(XLG)
+        CALC_A = 1.
+        DO I = 0, K-1
+            CALC_A = CALC_A * (XLG(I)*XPUNTO)
+        END DO
+        DO I = K+1, N-1
+            CALC_A = CALC_A * (XLG(I)*XPUNTO)
+        END DO
+    END FUNCTION
+    
+    !---FIN LAGRANGE---!
 END MODULE
