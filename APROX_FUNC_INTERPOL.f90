@@ -124,7 +124,6 @@ CONTAINS
         CALC_A = 1.
         DO I = 0, K-1
             CALC_A = CALC_A * (XLG(I)-XPUNTO)
-            !PRINT*, '(', XLG(I)'
         END DO
         DO I = K+1, N-1
             CALC_A = CALC_A * (XLG(I)-XPUNTO)
@@ -132,4 +131,31 @@ CONTAINS
     END FUNCTION
     
     !---FIN LAGRANGE---!
+    !---Inicio Newton---!
+    !Newton equiespaciado (diferencias finitas)
+    SUBROUTINE DIF_ASC(P, V_Asc, N, x0, h_orig)
+        !Variables
+        REAL(8), DIMENSION(0:N-1) :: V_Asc ,P, s
+        REAL(8) x0, h_orig, h_act
+        INTEGER N, i
+        
+        !Cuerpo
+        P = 0.
+        P(0) = (-x0 * V_Asc(1) / h_orig) + V_Asc(0) !Preparamos el polinomio cargando los dos
+        !primeros términos de la fórmula
+        P(1) = V_Asc(1) / h_orig
+        h_act = h_orig * h_orig
+        s = 0. !Cargamos el s inicial
+        s(0) = -x0
+        s(1) = 1.
+        DO i=2, N-1 !Vamos hasta N-1 que es la cantidad de términos del polinomio
+        CALL Mult_Vec_Bin(N, i-1, s, -(x0 + (i-1) * h_orig)) !Vamos multiplicando s 
+        !La función llama con el opuesto, es decir, si tenemos X-1 debemos llamar con -1
+        P = P + s * V_Asc(i) / (Factorial(i) * h_act)
+        h_act = h_act * h_orig
+        END DO
+    END SUBROUTINE
+    
+    !Newton con Diferencias Divididas
+    !---Fin Newton---!
 END MODULE

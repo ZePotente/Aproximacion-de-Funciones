@@ -35,6 +35,11 @@ PROGRAM APROX_FUNC
     PRINT *, 'POLINOMIO INTERPOLANTE POR LAGRANGE'
     CALL MET_LAGRANGE(X, Y, RESLG)
     
+    
+    !Polinomio interpolante con Newton
+    PRINT *, 'POLINOMIO INTERPOLANTE POR NEWTON'
+    CALL MET_NEWTON(X, Y)
+    
     GOTO 20
 10  PRINT *, 'Error de lectura de datos.'
 20  PRINT *, 'Fin.'
@@ -74,5 +79,20 @@ CONTAINS
         PRINT *, 'Calculando.'
         YPUNTO = PUNTO_LAGRANGE(XLG, YLG, XPUNTO)
         PRINT *, 'Punto calculado: ', YPUNTO
+    END SUBROUTINE
+    
+    SUBROUTINE MET_NEWTON(X, Y)
+        REAL(8), DIMENSION(:), INTENT(IN) :: X, Y
+        !
+        REAL(8), DIMENSION(:), ALLOCATABLE :: RES, DIFASC, DIFDESC
+        REAL(8) :: X0, H
+        INTEGER :: N
+        
+        X0 = X(0); H = (X(N-1) - X(0))/(N-1)
+        N = SIZE(X)
+        ALLOCATE(RES(0:N-1))
+        
+        PRINT *, 'Diferencias Ascendentes'
+        CALL DIF_ASC(RES, DIFASC, N, X0, H)
     END SUBROUTINE
 END PROGRAM
