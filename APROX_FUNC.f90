@@ -84,7 +84,8 @@ CONTAINS
     SUBROUTINE MET_NEWTON(X, Y)
         REAL(8), DIMENSION(:), INTENT(IN) :: X, Y
         !
-        REAL(8), DIMENSION(:), ALLOCATABLE :: RES, DIFASC, DIFDESC
+        REAL(8), DIMENSION(:), ALLOCATABLE :: RES, V_ASC, V_DESC
+        REAL(8), DIMENSION(:,:), ALLOCATABLE :: DIFFIN
         REAL(8) :: X0, H
         INTEGER :: N
         
@@ -92,7 +93,16 @@ CONTAINS
         N = SIZE(X)
         ALLOCATE(RES(0:N-1))
         
-        PRINT *, 'Diferencias Ascendentes'
-        CALL DIF_ASC(RES, DIFASC, N, X0, H)
+        CALL MAT_DIF_FIN(Y, DIFFIN)
+        PRINT *, 'Matriz de diferencias finitas: '
+        CALL MAT_MOSTRAR(DIFFIN)
+        PRINT *, 'Vector de diferencias finitas ascendentes: '
+        CALL VEC_DIF_ASC(DIFFIN, V_ASC)
+        CALL VEC_MOSTRAR(V_ASC)
+        PRINT *, 'Vector de diferencias finitas descendentes: '
+        CALL VEC_DIF_DESC(DIFFIN, V_DESC)
+        CALL VEC_MOSTRAR(V_DESC)
+!        PRINT *, 'Diferencias Ascendentes'
+!        CALL DIF_ASC(RES, DIFASC, N, X0, H)
     END SUBROUTINE
 END PROGRAM

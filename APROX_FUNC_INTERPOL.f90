@@ -133,6 +133,47 @@ CONTAINS
     !---FIN LAGRANGE---!
     !---Inicio Newton---!
     !Newton equiespaciado (diferencias finitas)
+    SUBROUTINE MAT_DIF_FIN(Y, MATDIF) ! genera matriz de diferencias asc y desc, pto equispaciados
+        REAL(8), DIMENSION(:), INTENT(IN) :: Y
+        REAL(8), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: MATDIF(:,:)
+        !
+        INTEGER :: N, M, I, J
+
+        N = SIZE(Y)
+        IF (ALLOCATED(MATDIF)) DEALLOCATE(MATDIF)
+        
+        ALLOCATE(MATDIF(N,N))
+        MATDIF = 0.0 ; MATDIF(:, 1) = Y(:)
+        M = N
+        DO J = 2, N
+            M = M - 1
+            DO I = 1, M
+                MATDIF(i,j) = MATDIF(i+1, j-1) - MATDIF(i, j-1)
+            END DO
+        END DO
+    END SUBROUTINE
+    
+    SUBROUTINE VEC_DIF_ASC(MATDIF, V_ASC)
+        REAL(8), DIMENSION(:,:), INTENT(IN) :: MATDIF
+        REAL(8), DIMENSION(:), ALLOCATABLE, INTENT(OUT) :: V_ASC
+        
+        ALLOCATE(V_ASC(SIZE(MATDIF,1)))
+        V_ASC = MATDIF(1,:)
+    END SUBROUTINE
+
+    SUBROUTINE VEC_DIF_DESC(MATDIF, V_DESC)
+        REAL(8), DIMENSION(:,:), INTENT(IN) :: MATDIF
+        REAL(8), DIMENSION(:), ALLOCATABLE, INTENT(OUT) :: V_DESC
+        !
+        INTEGER :: I, N
+        N = SIZE(MATDIF,1)
+        ALLOCATE(V_DESC(N))
+        
+        DO I = 1, N
+            V_DESC(I) = MATDIF(N - I+1, I)
+        END DO
+    END SUBROUTINE
+    
     SUBROUTINE DIF_ASC(P, V_Asc, N, x0, h_orig)
         !Variables
         REAL(8), DIMENSION(0:N-1) :: V_Asc ,P, s
@@ -154,6 +195,8 @@ CONTAINS
         P = P + s * V_Asc(i) / (Factorial(i) * h_act)
         h_act = h_act * h_orig
         END DO
+        
+        
     END SUBROUTINE
     
     !Newton con Diferencias Divididas
