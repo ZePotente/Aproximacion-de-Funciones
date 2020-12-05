@@ -174,29 +174,37 @@ CONTAINS
         END DO
     END SUBROUTINE
     
-    SUBROUTINE DIF_ASC(P, V_Asc, N, x0, h_orig)
-        !Variables
-        REAL(8), DIMENSION(0:N-1) :: V_Asc ,P, s
-        REAL(8) x0, h_orig, h_act
-        INTEGER N, i
+    SUBROUTINE NEWTON_ASCENDENTE(N, V_ASC, X0, H, A)
+        REAL(8), DIMENSION(0:N-1), INTENT(IN) :: V_ASC
+        REAL(8), INTENT(IN) :: X0, H
+        REAL(8), DIMENSION(:), ALLOCATABLE, INTENT(OUT) :: A
+        INTEGER, INTENT(IN) :: N
+        !
+        REAL(8), DIMENSION(:), ALLOCATABLE :: VEC_S
+        REAL(8) :: H_ACT
+        INTEGER :: I
         
-        !Cuerpo
-        P = 0.
-        P(0) = (-x0 * V_Asc(1) / h_orig) + V_Asc(0) !Preparamos el polinomio cargando los dos
-        !primeros términos de la fórmula
-        P(1) = V_Asc(1) / h_orig
-        h_act = h_orig * h_orig
-        s = 0. !Cargamos el s inicial
-        s(0) = -x0
-        s(1) = 1.
-        DO i=2, N-1 !Vamos hasta N-1 que es la cantidad de términos del polinomio
-        CALL Mult_Vec_Bin(N, i-1, s, -(x0 + (i-1) * h_orig)) !Vamos multiplicando s 
-        !La función llama con el opuesto, es decir, si tenemos X-1 debemos llamar con -1
-        P = P + s * V_Asc(i) / (Factorial(i) * h_act)
-        h_act = h_act * h_orig
+        IF (ALLOCATED(A)) DEALLOCATE(A)
+        ALLOCATE(A(0:N-1), VEC_S(0:N-1))
+    
+        !Inicializar A
+        A = 0.
+        A(0) = V_ASC(0) - X0*V_ASC(1)/H
+        A(1) = V_ASC(1)/H
+        !Inicializar S
+        VEC_S = 0.
+        VEC_S(0) = -X0
+        VEC_S(1) = 1.
+        
+        H_ACT = H
+        
+        DO I = 2, N-1
+            H_ACT = H_ACT*H
+            CALL MULT_VEC_BIN(N, I-1, VEC_S, -(X0 + (I-1)*H)) !S
+            
+            A = A + VEC_S*V_ASC(I) / (FACTORIAL(I)*H_ACT) !Coeficiente de A
         END DO
-        
-        
+        DEALLOCATE(VEC_S)
     END SUBROUTINE
     
     !Newton con Diferencias Divididas

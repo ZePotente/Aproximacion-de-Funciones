@@ -84,14 +84,16 @@ CONTAINS
     SUBROUTINE MET_NEWTON(X, Y)
         REAL(8), DIMENSION(:), INTENT(IN) :: X, Y
         !
-        REAL(8), DIMENSION(:), ALLOCATABLE :: RES, V_ASC, V_DESC
+        REAL(8), DIMENSION(:), ALLOCATABLE :: RESN, V_ASC, V_DESC, XLG, YLG
         REAL(8), DIMENSION(:,:), ALLOCATABLE :: DIFFIN
         REAL(8) :: X0, H
         INTEGER :: N
         
-        X0 = X(0); H = (X(N-1) - X(0))/(N-1)
         N = SIZE(X)
-        ALLOCATE(RES(0:N-1))
+        ALLOCATE(XLG(0:N-1), YLG(0:N-1))
+        XLG(:) = X(:); YLG(:) = Y(:);
+        X0 = XLG(0); H = (XLG(N-1) - XLG(0))/(N-1)
+        ALLOCATE(RESN(0:N-1))
         
         CALL MAT_DIF_FIN(Y, DIFFIN)
         PRINT *, 'Matriz de diferencias finitas: '
@@ -103,6 +105,8 @@ CONTAINS
         CALL VEC_DIF_DESC(DIFFIN, V_DESC)
         CALL VEC_MOSTRAR(V_DESC)
 !        PRINT *, 'Diferencias Ascendentes'
-!        CALL DIF_ASC(RES, DIFASC, N, X0, H)
+        CALL NEWTON_ASCENDENTE(N, V_ASC, X0, H, RESN)
+        PRINT *, 'Vector de coeficientes de Newton Ascendente:'
+        CALL VEC_MOSTRAR(RESN)
     END SUBROUTINE
 END PROGRAM
