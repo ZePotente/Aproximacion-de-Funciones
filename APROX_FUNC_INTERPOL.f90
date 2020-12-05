@@ -28,4 +28,72 @@ CONTAINS
         CALL MET_LU_CROUT(A, Y, C) !Uso LU Crout porque gauss es más complicado de llamar, 
         !y la matriz no es EDD (estrictamente diagonalmente dominante) como para llamar un método indirecto.
     END SUBROUTINE
+    
+    !---Lagrange, copypasteado---!
+    SUBROUTINE POLINOMIO_LAGRANGE(N, x, f, P)
+        !Variables
+        REAL(8), DIMENSION(0:N-1) :: x, f, P, L
+        REAL(8) denom
+        INTEGER N, i, j, k
+        !Cuerpo
+        P = 0.
+        DO k=0, N-1
+        L = 0.
+        L(0) = 1.
+        j = 1 ! Tamaño real del polinomio hasta el momento
+        denom = 1.
+        DO i=0, N-1
+            IF (k /= i) THEN
+                CALL MULT_VEC_BIN(N, j-1, L, -x(i)) !Llamo con j-1 que será el indice de la última
+                !componente a mover (todas las anteriores se moverán también)
+                denom = denom * (x(k) - x(i))
+                j = j + 1
+            END IF
+        END DO
+        L = L * f(k) / denom
+        P = P + L
+        END DO
+    END SUBROUTINE
+    
+    SUBROUTINE MULT_VEC_BIN(N, j, L, a)
+    !Variables
+        REAL(8), DIMENSION(0:N-1) :: L, VAux
+        REAL(8) a
+        INTEGER N, i, j
+
+        !Cuerpo
+        VAux = L
+        VAux = VAux * a
+        DO i=j, 0, -1 !Hacemos un corrimiento del vector, yendo de atrás hacia adelante para no pisar ningún dato.
+            L(i+1) = L(i)
+        END DO
+        L(0) = 0.
+        L = L + VAux
+    END SUBROUTINE
+    
+    FUNCTION Error_estimado(x, N, Punto_a_est, Derivada)
+        !Variables
+        REAL(8), DIMENSION(0:N) :: x
+        REAL(8) :: Punto_a_est, Derivada, Producto, Error_estimado
+        INTEGER :: N, i
+        
+        Producto = 1.
+        DO i=0, N
+            Producto = Producto * (Punto_a_est - x(i))
+        END DO
+        Error_estimado = Producto * Derivada / Factorial(N+1)
+    END FUNCTION
+    
+    FUNCTION FACTORIAL(N)
+        REAL(8) :: FACTORIAL
+        INTEGER, INTENT(IN) :: N
+        !
+        INTEGER :: I
+        FACTORIAL = 1.
+        DO I = 2, N
+            FACTORIAL = FACTORIAL * I
+        END DO
+    END FUNCTION
+    !Fin Lagrange copypasteado
+    
 END MODULE

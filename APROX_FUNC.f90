@@ -5,7 +5,8 @@ PROGRAM APROX_FUNC
     
     IMPLICIT NONE
     REAL(8), DIMENSION(:,:), ALLOCATABLE :: XY
-    REAL(8), DIMENSION(:), ALLOCATABLE :: X, Y, RES
+    REAL(8), DIMENSION(:), ALLOCATABLE :: X, Y, RESN
+    REAL(8), DIMENSION(:), ALLOCATABLE :: RESLG
     INTEGER :: BANDERA
     
     PRINT *, 'Leyendo matriz.'
@@ -23,10 +24,17 @@ PROGRAM APROX_FUNC
     PRINT *, 'Vector de valores de Y:'
     CALL VEC_MOSTRAR(Y)
     
+    !Polinomio interpolante normal
+    PRINT *, 'POLINOMIO INTERPOLANTE POR SISTEMA DE ECUACIONES LINEALES'
     PRINT *, 'Obteniendo coeficientes del polinomio interpolante.'
-    CALL POLINOMIO_APROX(X, Y, RES)
+    CALL POLINOMIO_APROX(X, Y, RESN)
     PRINT *, 'Coeficientes: '
-    CALL VEC_MOSTRAR(RES)
+    CALL VEC_MOSTRAR(RESN)
+    
+    !Polinomio interpolante de lagrange
+    PRINT *, 'POLINOMIO INTERPOLANTE POR LAGRANGE'
+    CALL MET_LAGRANGE(X, Y, RESLG)
+    
     GOTO 20
 10  PRINT *, 'Error de lectura de datos.'
 20  PRINT *, 'Fin.'
@@ -42,5 +50,23 @@ CONTAINS
         
         X(:) = XY(:,1)
         Y(:) = XY(:,2)
+    END SUBROUTINE
+    
+    SUBROUTINE MET_LAGRANGE(X, Y, RESLG)
+        REAL(8), DIMENSION(:), INTENT(IN) :: X, Y
+        REAL(8), DIMENSION(:), ALLOCATABLE, INTENT(OUT) :: RESLG
+        !
+        REAL(8), DIMENSION(:), ALLOCATABLE :: XLG, YLG
+        INTEGER :: N
+        
+        N = SIZE(X)
+        ALLOCATE(XLG(0:N-1), YLG(0:N-1), RESLG(0:N-1))
+        XLG(:) = X(:); YLG(:) = Y(:);
+        
+        PRINT *, 'Obteniendo coeficientes del polinomio interpolante de Lagrange.'
+        CALL POLINOMIO_LAGRANGE(N, XLG, YLG, RESLG)
+        PRINT *, 'Coeficientes: '
+        CALL VEC_MOSTRAR(RESLG)
+        
     END SUBROUTINE
 END PROGRAM
