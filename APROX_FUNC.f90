@@ -44,8 +44,13 @@ PROGRAM APROX_FUNC
     PRINT *, 'POLINOMIO INTERPOLANTE POR NEWTON NO NECESARIAMENTE EQUIESPACIADOS'
     CALL MET_NEWTON(X, Y)
     
+    !Aproximación por Splines Cúbicos.
     PRINT *, 'Splines cúbicos'
     CALL MET_SPLINES(X, Y)
+    
+    !Aproximación por Mínimos Cuadrados
+    PRINT *, 'Mínimos Cuadrados'
+    CALL MET_MIN_CUAD(X, Y)
     GOTO 20
 10  PRINT *, 'Error de lectura de datos.'
 20  PRINT *, 'Fin.'
@@ -168,5 +173,11 @@ CONTAINS
         CALL GUARDARSPLINE(XLG, Y, B, C, D, PASO)
         PRINT *, 'Datos guardados.'
         CALL SYSTEM("gnuplot scriptSplines.p")
+    END SUBROUTINE
+    
+    SUBROUTINE MET_MIN_CUAD(X, Y)
+        REAL(8), DIMENSION(:), INTENT(IN) :: X, Y
+        !
+        REAL(8), DIMENSION(:), ALLOCATABLE :: XLG, YLG
     END SUBROUTINE
 END PROGRAM
