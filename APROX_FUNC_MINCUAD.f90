@@ -1,6 +1,28 @@
 MODULE APROX_FUNC_MINCUAD
     IMPLICIT NONE
 CONTAINS
+    SUBROUTINE MIN_CUAD_OPTIMO(X, Y, RES_ACT)
+        REAL(8), DIMENSION(:), INTENT(IN) :: X, Y
+        REAL(8), DIMENSION(:), ALLOCATABLE, INTENT(OUT):: RES_ACT
+        !
+        REAL(8), DIMENSION(:), ALLOCATABLE :: RES_SIG !El resultado del grado siguiente
+        REAL(8) :: VC_SIG, VC_ACT
+        INTEGER :: I
+        
+        CALL MIN_CUAD(X, Y, 1, RES_ACT); VC_ACT = MIN_CUAD_VARCUAD(X, Y, RES_ACT);
+        CALL MIN_CUAD(X, Y, 2, RES_SIG); VC_SIG = MIN_CUAD_VARCUAD(X, Y, RES_SIG);
+        WRITE(*, '(A20, F25.15)') 'Actual: ', VC_ACT
+        WRITE(*, '(A20, F25.15)') 'Siguiente: ', VC_SIG
+        I = 1
+        DO WHILE(VC_ACT > VC_SIG .AND. I < SIZE(X)-2)
+            I = I + 1!Ya el óptimo es al menos el actual.
+            RES_ACT = RES_SIG; VC_ACT = VC_SIG
+            CALL MIN_CUAD(X, Y, I+1, RES_SIG); VC_SIG = MIN_CUAD_VARCUAD(X, Y, RES_SIG);
+            WRITE(*, '(A20, F25.15)') 'Actual: ', VC_ACT
+            WRITE(*, '(A20, F25.15)') 'Siguiente: ', VC_SIG
+        END DO
+    END SUBROUTINE
+
     SUBROUTINE MIN_CUAD(X, Y, GRADO, RES)
         REAL(8), DIMENSION(:), INTENT(IN) :: X, Y
         REAL(8), DIMENSION(:), ALLOCATABLE, INTENT(OUT):: RES
@@ -15,6 +37,7 @@ CONTAINS
         DO I = 1, N
             L = L + I
         END DO
+        IF (ALLOCATED(RES)) DEALLOCATE(RES)
         ALLOCATE(AUX(M), DIAG(2*N-1), B(N), RES(N), AP(L))
         
         DIAG(1) = M
