@@ -49,4 +49,40 @@ CONTAINS
         
         DEALLOCATE(UD, DD, LD)
     END SUBROUTINE
+    
+    SUBROUTINE GUARDARSPLINE(X, A, B, C, D, PASO)
+        REAL(8), DIMENSION(0:), INTENT(IN) :: X, A, B, C, D
+        REAL(8), INTENT(IN) :: PASO
+        !
+        REAL(8) :: XACT
+        INTEGER :: I, J, N
+        CHARACTER(*), PARAMETER :: ARCH_SPLINES = 'Splines.txt'
+        N = SIZE(X)
+        !Guardo puntos de los splines
+        OPEN(1, FILE = ARCH_SPLINES)
+        XACT = X(0)
+        I = 0; J = 0;
+        DO WHILE(XACT < X(N-1))
+            IF (XACT > X(J+1)) J = J+1 !Supongo que PASO es menor que el intervalo de x más chico.
+            
+            WRITE(1, '(2F25.15)') XACT, POL(J, A, B, C, D, X, XACT)
+            I = I + 1
+            XACT = XACT + PASO
+        END DO
+        !Escribo el punto que sigue para que no se corte la gráfica antes del último punto dato cuando compare ambas
+        WRITE(1, '(2F25.15)') XACT, POL(J, A, B, C, D, X, XACT)
+        CLOSE(1)
+        !No guardo los puntos porque yo ya los leo de un archivo.
+    END SUBROUTINE
+    
+    FUNCTION POL(J, A, B, C , D, X, XACT)
+        REAL(8) :: POL
+        REAL(8), DIMENSION(0:), INTENT(IN) :: X, A, B, C, D
+        REAL(8), INTENT(IN) :: XACT
+        INTEGER, INTENT(IN) :: J
+        !
+        REAL(8) :: H
+        H = XACT - X(J)
+        POL = A(J) + B(J)*H + C(J)*H**2 + D(J)*H**3
+    END FUNCTION
 END MODULE
