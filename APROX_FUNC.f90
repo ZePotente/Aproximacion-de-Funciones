@@ -5,7 +5,8 @@ PROGRAM APROX_FUNC
     
     IMPLICIT NONE
     REAL(8), DIMENSION(:,:), ALLOCATABLE :: XY
-    REAL(8), DIMENSION(:), ALLOCATABLE :: X, Y, RES
+    REAL(8), DIMENSION(:), ALLOCATABLE :: X, Y, RESN
+    REAL(8), DIMENSION(:), ALLOCATABLE :: RESLG
     INTEGER :: BANDERA
     
     PRINT *, 'Leyendo matriz.'
@@ -23,10 +24,25 @@ PROGRAM APROX_FUNC
     PRINT *, 'Vector de valores de Y:'
     CALL VEC_MOSTRAR(Y)
     
+    !Polinomio interpolante normal
+    PRINT *, 'POLINOMIO INTERPOLANTE POR SISTEMA DE ECUACIONES LINEALES'
     PRINT *, 'Obteniendo coeficientes del polinomio interpolante.'
-    CALL POLINOMIO_APROX(X, Y, RES)
+    CALL POLINOMIO_APROX(X, Y, RESN)
     PRINT *, 'Coeficientes: '
-    CALL VEC_MOSTRAR(RES)
+    CALL VEC_MOSTRAR(RESN)
+    
+    !Polinomio interpolante de lagrange
+    PRINT *, 'POLINOMIO INTERPOLANTE POR LAGRANGE'
+    CALL MET_LAGRANGE(X, Y, RESLG)
+    
+    
+    !Polinomio interpolante con Newton
+    PRINT *, 'POLINOMIO INTERPOLANTE POR NEWTON EQUIESPACIADOS'
+    CALL MET_NEWTON_EQUI(X, Y)
+    
+    PRINT *, 'POLINOMIO INTERPOLANTE POR NEWTON NO NECESARIAMENTE EQUIESPACIADOS'
+    CALL MET_NEWTON(X, Y)
+    
     GOTO 20
 10  PRINT *, 'Error de lectura de datos.'
 20  PRINT *, 'Fin.'
@@ -42,5 +58,86 @@ CONTAINS
         
         X(:) = XY(:,1)
         Y(:) = XY(:,2)
+    END SUBROUTINE
+    
+    SUBROUTINE MET_LAGRANGE(X, Y, RESLG)
+        REAL(8), DIMENSION(:), INTENT(IN) :: X, Y
+        REAL(8), DIMENSION(:), ALLOCATABLE, INTENT(OUT) :: RESLG
+        !
+        REAL(8), DIMENSION(:), ALLOCATABLE :: XLG, YLG
+        REAL(8) :: XPUNTO, YPUNTO
+        INTEGER :: N
+        
+        N = SIZE(X)
+        ALLOCATE(XLG(0:N-1), YLG(0:N-1), RESLG(0:N-1))
+        XLG(:) = X(:); YLG(:) = Y(:);
+        
+        PRINT *, 'Obteniendo coeficientes del polinomio interpolante de Lagrange.'
+        CALL POLINOMIO_LAGRANGE(N, XLG, YLG, RESLG)
+        PRINT *, 'Coeficientes: '
+        CALL VEC_MOSTRAR(RESLG)
+        
+        XPUNTO = 0.4
+        PRINT *, 'Calculo en el punto: ', XPUNTO
+        PRINT *, 'Calculando.'
+        YPUNTO = PUNTO_LAGRANGE(XLG, YLG, XPUNTO)
+        PRINT *, 'Punto calculado: ', YPUNTO
+    END SUBROUTINE
+    
+    SUBROUTINE MET_NEWTON_EQUI(X, Y)
+        REAL(8), DIMENSION(:), INTENT(IN) :: X, Y
+        !
+        REAL(8), DIMENSION(:), ALLOCATABLE :: V_ASC, V_DESC, XLG, YLG, RESASC, RESDESC
+        REAL(8), DIMENSION(:,:), ALLOCATABLE :: DIFFIN
+        REAL(8) :: X0, H
+        INTEGER :: N
+        
+        N = SIZE(X)
+        ALLOCATE(XLG(0:N-1), YLG(0:N-1))
+        XLG(:) = X(:); YLG(:) = Y(:);
+        X0 = XLG(0); H = (XLG(N-1) - XLG(0))/(N-1)
+        
+        CALL MAT_DIF_FIN(Y, DIFFIN)
+        PRINT *, 'Matriz de diferencias finitas: '
+        CALL MAT_MOSTRAR(DIFFIN)
+        PRINT *, 'Vector de diferencias finitas ascendentes: '
+        CALL VEC_DIF_ASC(DIFFIN, V_ASC)
+        CALL VEC_MOSTRAR(V_ASC)
+        PRINT *, 'Vector de diferencias finitas descendentes: '
+        CALL VEC_DIF_DESC(DIFFIN, V_DESC)
+        CALL VEC_MOSTRAR(V_DESC)
+        
+        PRINT *, 'Calculando Diferencias Ascendentes'
+        CALL NEWTON_ASCENDENTE(N, V_ASC, X0, H, RESASC)
+        PRINT *, 'Vector de coeficientes de Newton Ascendente:'
+        CALL VEC_MOSTRAR(RESASC)
+        
+        PRINT *, 'Calculando Diferencias Descendentes'
+        CALL NEWTON_DESCENDENTE(N, V_DESC, X0, H, RESDESC)
+        PRINT *, 'Vector de coeficientes de Newton Descendente:'
+        CALL VEC_MOSTRAR(RESDESC)
+    END SUBROUTINE
+    
+    SUBROUTINE MET_NEWTON(X, Y)
+        REAL(8), DIMENSION(:), INTENT(IN) :: X, Y
+        !
+        REAL(8), DIMENSION(:), ALLOCATABLE :: XLG, YLG, RESDIV, VECDIV
+        REAL(8), DIMENSION(:,:), ALLOCATABLE :: DIFDIV
+        INTEGER :: N
+        
+        N = SIZE(X)
+        ALLOCATE(XLG(0:N-1), YLG(0:N-1))
+        XLG(:) = X(:); YLG(:) = Y(:);
+        
+        CALL MAT_DIF_DIV(XLG, YLG, DIFDIV)
+        PRINT *, 'Matriz de Diferencias Divididas:'
+        CALL MAT_MOSTRAR(DIFDIV)
+        CALL VEC_DIF_DIV(DIFDIV, VECDIV)
+        PRINT *, 'Vector de Diferencias Divididas:'
+        CALL VEC_MOSTRAR(VECDIV)
+        PRINT *, 'Calculando Diferencias Divididas.'
+        CALL NEWTON_DIFERENCIAS_DIVIDIDAS(N, VECDIV, XLG, RESDIV)
+        PRINT *, 'Vector de coeficientes de Newton con Diferencias Divididas:'
+        CALL VEC_MOSTRAR(RESDIV)
     END SUBROUTINE
 END PROGRAM
