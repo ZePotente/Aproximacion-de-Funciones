@@ -41,4 +41,45 @@ CONTAINS
         RES = B
         DEALLOCATE(AUX, DIAG, B, AP)
     END SUBROUTINE
+    
+    FUNCTION MIN_CUAD_RMS(X, Y, A)
+        REAL(8) :: MIN_CUAD_RMS
+        REAL(8), DIMENSION(:), INTENT(IN) :: X, Y, A
+        !
+        REAL(8) :: SUMA
+        INTEGER :: M!, GRADO
+        
+        M = SIZE(X)
+        SUMA = SUMATORIA_ERROR(X, Y, A, M)
+        MIN_CUAD_RMS = SQRT(SUMA/M)
+        !GRADO = SIZE(A)-1
+        
+    END FUNCTION
+    
+    FUNCTION SUMATORIA_ERROR(X, Y, A, M)
+        REAL(8) :: SUMATORIA_ERROR
+        REAL(8), DIMENSION(:), INTENT(IN) :: X, Y, A
+        INTEGER, INTENT(IN) :: M
+        !
+        INTEGER :: K
+        SUMATORIA_ERROR = 0.
+        DO K = 1, M
+            SUMATORIA_ERROR = SUMATORIA_ERROR + (Y(K)- POLINOMIO(A, X(K)))**2
+        END DO
+    END FUNCTION
+    FUNCTION POLINOMIO(A, X)
+        REAL(8) :: POLINOMIO
+        REAL(8), DIMENSION(:), INTENT(IN) :: A
+        REAL(8), INTENT(IN) :: X
+        !
+        REAL(8) :: XPOT
+        INTEGER :: I, N
+        
+        N = SIZE(A)
+        POLINOMIO = A(1); XPOT = 1.;
+        DO I = 2, N
+            XPOT = XPOT*X !Calculo X^i
+            POLINOMIO = POLINOMIO + A(I)*XPOT
+        END DO
+    END FUNCTION
 END MODULE
