@@ -40,8 +40,8 @@ PROGRAM APROX_FUNC
     PRINT *, 'POLINOMIO INTERPOLANTE POR NEWTON EQUIESPACIADOS'
     CALL MET_NEWTON_EQUI(X, Y)
     
-!    PRINT *, 'POLINOMIO INTERPOLANTE POR NEWTON'
-!    CALL MET_NEWTON(X, Y)
+    PRINT *, 'POLINOMIO INTERPOLANTE POR NEWTON NO NECESARIAMENTE EQUIESPACIADOS'
+    CALL MET_NEWTON(X, Y)
     
     GOTO 20
 10  PRINT *, 'Error de lectura de datos.'
@@ -107,14 +107,37 @@ CONTAINS
         CALL VEC_DIF_DESC(DIFFIN, V_DESC)
         CALL VEC_MOSTRAR(V_DESC)
         
-        PRINT *, 'Diferencias Ascendentes'
+        PRINT *, 'Calculando Diferencias Ascendentes'
         CALL NEWTON_ASCENDENTE(N, V_ASC, X0, H, RESASC)
         PRINT *, 'Vector de coeficientes de Newton Ascendente:'
         CALL VEC_MOSTRAR(RESASC)
         
-        PRINT *, 'Diferencias Descendentes'
+        PRINT *, 'Calculando Diferencias Descendentes'
         CALL NEWTON_DESCENDENTE(N, V_DESC, X0, H, RESDESC)
         PRINT *, 'Vector de coeficientes de Newton Descendente:'
         CALL VEC_MOSTRAR(RESDESC)
+    END SUBROUTINE
+    
+    SUBROUTINE MET_NEWTON(X, Y)
+        REAL(8), DIMENSION(:), INTENT(IN) :: X, Y
+        !
+        REAL(8), DIMENSION(:), ALLOCATABLE :: XLG, YLG, RESDIV, VECDIV
+        REAL(8), DIMENSION(:,:), ALLOCATABLE :: DIFDIV
+        INTEGER :: N
+        
+        N = SIZE(X)
+        ALLOCATE(XLG(0:N-1), YLG(0:N-1))
+        XLG(:) = X(:); YLG(:) = Y(:);
+        
+        CALL MAT_DIF_DIV(XLG, YLG, DIFDIV)
+        PRINT *, 'Matriz de Diferencias Divididas:'
+        CALL MAT_MOSTRAR(DIFDIV)
+        CALL VEC_DIF_DIV(DIFDIV, VECDIV)
+        PRINT *, 'Vector de Diferencias Divididas:'
+        CALL VEC_MOSTRAR(VECDIV)
+        PRINT *, 'Calculando Diferencias Divididas.'
+        CALL NEWTON_DIFERENCIAS_DIVIDIDAS(N, VECDIV, XLG, RESDIV)
+        PRINT *, 'Vector de coeficientes de Newton con Diferencias Divididas:'
+        CALL VEC_MOSTRAR(RESDIV)
     END SUBROUTINE
 END PROGRAM

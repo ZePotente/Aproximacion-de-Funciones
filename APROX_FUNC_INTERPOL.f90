@@ -240,7 +240,60 @@ CONTAINS
     END SUBROUTINE
 
     !Newton con Diferencias Divididas
+    SUBROUTINE MAT_DIF_DIV(X, Y, MATDIF)
+        REAL(8), DIMENSION(:), INTENT(IN) :: X, Y
+        REAL(8), DIMENSION(:,:), ALLOCATABLE, INTENT(OUT) :: MATDIF
+        !
+        INTEGER :: N, M, I, J
+        N = SIZE(X)
+        IF (ALLOCATED(MATDIF)) DEALLOCATE(MATDIF)
+        ALLOCATE(MATDIF(N,N))
+        
+        MATDIF = 0.
+        MATDIF(:,1) = Y(:)
+        
+        M = N
+        DO J = 2, N
+            M = M - 1
+            DO I = 1, M
+                MATDIF(I,J) = (MATDIF(I+1, J-1) - MATDIF(I, J-1)) / (X(I + J-1) - X(I))
+            END DO
+        END DO
+    END SUBROUTINE
     
+    SUBROUTINE VEC_DIF_DIV(MATDIF, VECDIF)
+        REAL(8), DIMENSION(:,:), INTENT(IN) :: MATDIF
+        REAL(8), DIMENSION(:), ALLOCATABLE, INTENT(OUT) :: VECDIF
+        
+        ALLOCATE(VECDIF(SIZE(MATDIF,1)))
+        VECDIF = MATDIF(1,:)
+    END SUBROUTINE
     
+    SUBROUTINE NEWTON_DIFERENCIAS_DIVIDIDAS(N, V_DIV, X, A)
+        REAL(8), DIMENSION(0:N-1), INTENT(IN) :: V_DIV, X
+        REAL(8), DIMENSION(:), ALLOCATABLE, INTENT(OUT) :: A
+        INTEGER, INTENT(IN) :: N
+        !
+        REAL(8), ALLOCATABLE :: VEC_AUX(:)
+        INTEGER :: I
+        
+        IF (ALLOCATED(A)) DEALLOCATE(A)
+        ALLOCATE(A(0:N-1), VEC_AUX(0:N-1))
+        !A
+        A = 0.
+        A(0) = V_DIV(0) - X(0)*V_DIV(1)
+        A(1) = V_DIV(1)
+        !AUX similar a S
+        VEC_AUX = 0.
+        VEC_AUX(0) = -X(0)
+        VEC_AUX(1) = 1.
+        
+        DO I = 2, N-1
+            CALL MULT_VEC_BIN(N, I-1, VEC_AUX, -X(I-1)) !AUX
+            A = A + VEC_AUX*V_DIV(I)
+        END DO
+        
+        DEALLOCATE(VEC_AUX)
+    END SUBROUTINE
     !---Fin Newton---!
 END MODULE
