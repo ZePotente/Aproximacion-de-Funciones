@@ -42,17 +42,28 @@ CONTAINS
         DEALLOCATE(AUX, DIAG, B, AP)
     END SUBROUTINE
     
+    FUNCTION MIN_CUAD_VARCUAD(X, Y, A)
+        REAL(8) :: MIN_CUAD_VARCUAD
+        REAL(8), DIMENSION(:), INTENT(IN) :: X, Y, A
+        !
+        REAL(8) :: SUMA
+        INTEGER :: M, GRADO
+        
+        M = SIZE(X)
+        SUMA = SUMATORIA_ERROR(X, Y, A, M)
+        GRADO = SIZE(A)-1
+        MIN_CUAD_VARCUAD = SUMA/(M-GRADO-1)
+    END FUNCTION
     FUNCTION MIN_CUAD_RMS(X, Y, A)
         REAL(8) :: MIN_CUAD_RMS
         REAL(8), DIMENSION(:), INTENT(IN) :: X, Y, A
         !
         REAL(8) :: SUMA
-        INTEGER :: M!, GRADO
+        INTEGER :: M
         
         M = SIZE(X)
         SUMA = SUMATORIA_ERROR(X, Y, A, M)
         MIN_CUAD_RMS = SQRT(SUMA/M)
-        !GRADO = SIZE(A)-1
         
     END FUNCTION
     
@@ -62,11 +73,13 @@ CONTAINS
         INTEGER, INTENT(IN) :: M
         !
         INTEGER :: K
+        
         SUMATORIA_ERROR = 0.
         DO K = 1, M
             SUMATORIA_ERROR = SUMATORIA_ERROR + (Y(K)- POLINOMIO(A, X(K)))**2
         END DO
     END FUNCTION
+    
     FUNCTION POLINOMIO(A, X)
         REAL(8) :: POLINOMIO
         REAL(8), DIMENSION(:), INTENT(IN) :: A
