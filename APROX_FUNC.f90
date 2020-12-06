@@ -3,6 +3,7 @@ PROGRAM APROX_FUNC
     USE VYM_IO
     USE APROX_FUNC_INTERPOL
     USE APROX_FUNC_SPLINES
+    USE APROX_FUNC_MINCUAD
     
     IMPLICIT NONE
     REAL(8), DIMENSION(:,:), ALLOCATABLE :: XY
@@ -178,6 +179,14 @@ CONTAINS
     SUBROUTINE MET_MIN_CUAD(X, Y)
         REAL(8), DIMENSION(:), INTENT(IN) :: X, Y
         !
-        REAL(8), DIMENSION(:), ALLOCATABLE :: XLG, YLG
+        REAL(8), DIMENSION(:), ALLOCATABLE :: RESMC
+        INTEGER :: GRADO
+        GRADO = 1
+        PRINT *, 'Empezando resolución por Mínimos Cuadrados.'
+        CALL MIN_CUAD(X, Y, GRADO, RESMC)
+        PRINT *, 'Mínimos Cuadrados resueltos.'
+        PRINT *, 'Vector de coeficientes de Mínimos Cuadrados:'
+        CALL VEC_MOSTRAR(RESMC)
+        
     END SUBROUTINE
 END PROGRAM
