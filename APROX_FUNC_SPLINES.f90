@@ -72,7 +72,13 @@ CONTAINS
         !Escribo el punto que sigue para que no se corte la gráfica antes del último punto dato cuando compare ambas
         WRITE(1, '(2F25.15)') XACT, POL(J, A, B, C, D, X, XACT)
         CLOSE(1)
-        !No guardo los puntos porque yo ya los leo de un archivo.
+        !Guardo los puntos originales de la función, porque Puntos.txt incluye al principio el tamaño
+        OPEN(1, FILE = 'PuntosPlot.txt')
+        
+        DO I = 0, N-1
+            WRITE(1, '(2F25.15)') X(I), A(I)
+        END DO
+        CLOSE(1)
     END SUBROUTINE
     
     FUNCTION POL(J, A, B, C , D, X, XACT)

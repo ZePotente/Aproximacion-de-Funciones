@@ -2,6 +2,7 @@ PROGRAM APROX_FUNC
     !Modulo
     USE VYM_IO
     USE APROX_FUNC_INTERPOL
+    USE APROX_FUNC_SPLINES
     
     IMPLICIT NONE
     REAL(8), DIMENSION(:,:), ALLOCATABLE :: XY
@@ -43,6 +44,8 @@ PROGRAM APROX_FUNC
     PRINT *, 'POLINOMIO INTERPOLANTE POR NEWTON NO NECESARIAMENTE EQUIESPACIADOS'
     CALL MET_NEWTON(X, Y)
     
+    PRINT *, 'Splines cúbicos'
+    CALL MET_SPLINES(X, Y)
     GOTO 20
 10  PRINT *, 'Error de lectura de datos.'
 20  PRINT *, 'Fin.'
@@ -139,5 +142,31 @@ CONTAINS
         CALL NEWTON_DIFERENCIAS_DIVIDIDAS(N, VECDIV, XLG, RESDIV)
         PRINT *, 'Vector de coeficientes de Newton con Diferencias Divididas:'
         CALL VEC_MOSTRAR(RESDIV)
+    END SUBROUTINE
+    
+    SUBROUTINE MET_SPLINES(X, Y)
+        REAL(8), DIMENSION(:), INTENT(IN) :: X, Y
+        !
+        REAL(8), DIMENSION(:), ALLOCATABLE :: XLG, YLG, H, B, C, D
+        REAL(8), PARAMETER :: PASO = 1D-5
+        INTEGER :: N
+        
+        N = SIZE(X)
+        ALLOCATE(XLG(0:N-1), YLG(0:N-1))
+        XLG(:) = X(:); YLG(:) = Y(:);
+        PRINT *, 'Creando el vector de DX (h)'
+        CALL CREAR_H(XLG, H)
+        PRINT *, 'Vector H:'
+        CALL VEC_MOSTRAR(H)
+        
+        PRINT *, 'Empezando resolución por Splines Cúbicos.'
+        CALL SPLINES_CUBICOS(Y, B, C, D, H) !Y es A, como vimos en la teoría
+        PRINT *, 'Splines Cúbicos resueltos.'
+!        PRINT *, 'Coeficientes de A, B, C y D:'
+!        CALL VEC_MOSTRAR(Y); CALL VEC_MOSTRAR(B); CALL VEC_MOSTRAR(C); CALL VEC_MOSTRAR(D); 
+        PRINT *, 'Guardando datos de los splines en archivo.'
+        CALL GUARDARSPLINE(XLG, Y, B, C, D, PASO)
+        PRINT *, 'Datos guardados.'
+        CALL SYSTEM("gnuplot scriptSplines.p")
     END SUBROUTINE
 END PROGRAM
