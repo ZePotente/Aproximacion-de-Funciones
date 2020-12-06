@@ -3,6 +3,8 @@ PROGRAM APROX_FUNC
     USE VYM_IO
     USE APROX_FUNC_INTERPOL
     USE APROX_FUNC_SPLINES
+    USE APROX_FUNC_MINCUAD
+    USE APROX_FUNC_GRAF
     
     IMPLICIT NONE
     REAL(8), DIMENSION(:,:), ALLOCATABLE :: XY
@@ -44,8 +46,13 @@ PROGRAM APROX_FUNC
     PRINT *, 'POLINOMIO INTERPOLANTE POR NEWTON NO NECESARIAMENTE EQUIESPACIADOS'
     CALL MET_NEWTON(X, Y)
     
+    !Aproximación por Splines Cúbicos.
     PRINT *, 'Splines cúbicos'
     CALL MET_SPLINES(X, Y)
+    
+    !Aproximación por Mínimos Cuadrados
+    PRINT *, 'Mínimos Cuadrados'
+    CALL MET_MIN_CUAD(X, Y)
     GOTO 20
 10  PRINT *, 'Error de lectura de datos.'
 20  PRINT *, 'Fin.'
@@ -168,5 +175,32 @@ CONTAINS
         CALL GUARDARSPLINE(XLG, Y, B, C, D, PASO)
         PRINT *, 'Datos guardados.'
         CALL SYSTEM("gnuplot scriptSplines.p")
+    END SUBROUTINE
+    
+    SUBROUTINE MET_MIN_CUAD(X, Y)
+        REAL(8), DIMENSION(:), INTENT(IN) :: X, Y
+        !
+        REAL(8), DIMENSION(:), ALLOCATABLE :: RESMC, RESOPT
+        INTEGER :: GRADO
+        GRADO = 1
+        PRINT *, 'Empezando resolución por Mínimos Cuadrados.'
+        CALL MIN_CUAD(X, Y, GRADO, RESMC)
+        PRINT *, 'Mínimos Cuadrados resueltos.'
+        PRINT *, 'Vector de coeficientes de Mínimos Cuadrados:'
+        CALL VEC_MOSTRAR(RESMC)
+        
+        PRINT *, 'Recordatorio de que el grado debe ser menor que la cantidad de puntos.'
+        WRITE(*, '(A, F25.15)') 'RMS = ', MIN_CUAD_RMS(X, Y, RESMC)
+        WRITE(*, '(A, F25.15)') 'Varianza al cuadrado = ', MIN_CUAD_VARCUAD(X, Y, RESMC)
+        
+        PRINT *, 'Buscando el grado óptimo computacionalmente.'
+        CALL MIN_CUAD_OPTIMO(X, Y, RESOPT)
+        PRINT *, 'Resultado óptimo:'
+        CALL VEC_MOSTRAR(RESOPT)
+        PRINT *, 'Grado óptimo:', SIZE(RESOPT)-1
+        
+        CALL GUARDAR_POL(RESMC, X(1), X(SIZE(X)), 1D-3)
+        CALL GUARDAR_PUNTOS(X, Y)
+        CALL SYSTEM("gnuplot scriptPolinomio.p")
     END SUBROUTINE
 END PROGRAM
