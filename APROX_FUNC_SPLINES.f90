@@ -2,14 +2,14 @@ MODULE APROX_FUNC_SPLINES
     IMPLICIT NONE
 CONTAINS
     SUBROUTINE CREAR_H(X, H)
-        REAL(8), DIMENSION(:), INTENT(IN) :: X
+        REAL(8), DIMENSION(0:), INTENT(IN) :: X
         REAL(8), DIMENSION(:), ALLOCATABLE, INTENT(OUT) :: H
         !
         INTEGER :: N, I
         N = SIZE(X)
         IF (ALLOCATED(H)) DEALLOCATE(H)
-        ALLOCATE(H(0:N-1))
-        DO I = 0, N-1
+        ALLOCATE(H(0:N-2))
+        DO I = 0, N-2
             H(I) = X(I+1) - X(I)
         END DO
     END SUBROUTINE
