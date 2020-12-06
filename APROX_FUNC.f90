@@ -37,8 +37,11 @@ PROGRAM APROX_FUNC
     
     
     !Polinomio interpolante con Newton
-    PRINT *, 'POLINOMIO INTERPOLANTE POR NEWTON'
-    CALL MET_NEWTON(X, Y)
+    PRINT *, 'POLINOMIO INTERPOLANTE POR NEWTON EQUIESPACIADOS'
+    CALL MET_NEWTON_EQUI(X, Y)
+    
+!    PRINT *, 'POLINOMIO INTERPOLANTE POR NEWTON'
+!    CALL MET_NEWTON(X, Y)
     
     GOTO 20
 10  PRINT *, 'Error de lectura de datos.'
@@ -81,10 +84,10 @@ CONTAINS
         PRINT *, 'Punto calculado: ', YPUNTO
     END SUBROUTINE
     
-    SUBROUTINE MET_NEWTON(X, Y)
+    SUBROUTINE MET_NEWTON_EQUI(X, Y)
         REAL(8), DIMENSION(:), INTENT(IN) :: X, Y
         !
-        REAL(8), DIMENSION(:), ALLOCATABLE :: RESN, V_ASC, V_DESC, XLG, YLG
+        REAL(8), DIMENSION(:), ALLOCATABLE :: V_ASC, V_DESC, XLG, YLG, RESASC, RESDESC
         REAL(8), DIMENSION(:,:), ALLOCATABLE :: DIFFIN
         REAL(8) :: X0, H
         INTEGER :: N
@@ -93,7 +96,6 @@ CONTAINS
         ALLOCATE(XLG(0:N-1), YLG(0:N-1))
         XLG(:) = X(:); YLG(:) = Y(:);
         X0 = XLG(0); H = (XLG(N-1) - XLG(0))/(N-1)
-        ALLOCATE(RESN(0:N-1))
         
         CALL MAT_DIF_FIN(Y, DIFFIN)
         PRINT *, 'Matriz de diferencias finitas: '
@@ -104,9 +106,15 @@ CONTAINS
         PRINT *, 'Vector de diferencias finitas descendentes: '
         CALL VEC_DIF_DESC(DIFFIN, V_DESC)
         CALL VEC_MOSTRAR(V_DESC)
-!        PRINT *, 'Diferencias Ascendentes'
-        CALL NEWTON_ASCENDENTE(N, V_ASC, X0, H, RESN)
+        
+        PRINT *, 'Diferencias Ascendentes'
+        CALL NEWTON_ASCENDENTE(N, V_ASC, X0, H, RESASC)
         PRINT *, 'Vector de coeficientes de Newton Ascendente:'
-        CALL VEC_MOSTRAR(RESN)
+        CALL VEC_MOSTRAR(RESASC)
+        
+        PRINT *, 'Diferencias Descendentes'
+        CALL NEWTON_DESCENDENTE(N, V_DESC, X0, H, RESDESC)
+        PRINT *, 'Vector de coeficientes de Newton Descendente:'
+        CALL VEC_MOSTRAR(RESDESC)
     END SUBROUTINE
 END PROGRAM
